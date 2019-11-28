@@ -1,0 +1,68 @@
+---
+title: "data-prep"
+author: "g"
+date: "11/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(Matching)
+library(janitor)
+library(tidyverse)
+```
+
+
+Download raw data from Opportiunity Insights
+
+```{r}
+dir.create("raw-data")
+
+# data by state  
+
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/table_1b.csv", destfile = "raw-data/state_innov.csv")
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/table2_state_absmob_by_cohort.xlsx", destfile = "raw-data/abs_mobility_state.xlsx", mode = "wb")
+download.file("https://opportunityinsights.org/wp-content/uploads/2019/01/mrc_table12.csv", destfile = "raw-data/state_income_dis.csv")
+
+```
+
+
+
+Cleaning data (by state):
+
+
+```{r}
+# read csv
+
+st_inventors <- read_csv("raw-data/state_innov.csv")
+st_abs_mobility <- read_xlsx("raw-data/abs_mobility_state.xlsx")
+st_income <- read_csv("raw-data/state_income_dis.csv")
+
+# clean
+
+st_income <- st_income %>%
+  filter(state_name != "Missing") %>%
+  # filter for 1980
+  filter(cohort == "1980") %>%
+  select(state_abbr, par_q1, par_q2, par_q3, par_q4, par_q5)
+
+st_abs_mobility <- st_abs_mobility %>%
+  filter(cohort == "1980") 
+
+st_inventors <- st_inventors %>%
+  select(par_stateabbrv, inventor, inventor_cat_1, inventor_cat_2, inventor_cat_3, inventor_cat_4,
+         inventor_cat_5, inventor_cat_6, inventor_cat_7, inventor_g_f, inventor_g_m, kid_count)
+
+# combine three tables
+
+state_data <- merge(st_abs_mobility, st_inventors, by.x = "state_name", by.y = "par_stateabbrv")
+state_data <- merge(state_data, st_income, by.x = "state_name", by.y = "state_abbr")
+
+# write cleaned data as a csv
+
+write.csv(state_data, file = "App/by_state.csv")
+```
+
