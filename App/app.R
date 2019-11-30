@@ -51,9 +51,16 @@ ui <- fluidPage(
                                 )),
                        tabPanel("By College")
                         )),
-              tabPanel("Economic Mobility")
+              tabPanel("Economic Mobility",
+                    navlistPanel(
+                        tabPanel("Backgroung"),
+                        tabPanel("By State",
+                                 tableOutput("match_state")),
+                        tabPanel("By Commuting Zone")
+                        
+                    )
                )
-)
+))
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -71,6 +78,26 @@ server <- function(input, output) {
             ggplot(data = cz, aes(x = input$in_q2, y =inventor)) +
                 geom_point() 
     }) 
+    
+    # matching on state level
+    
+    # define the treatment
+    state <- state %>%
+        mutate(treatment = ifelse(cohort_mean > 0.5, 1, 0))
+    # set controls
+    controls <-  state %>%
+        select(par_q5, par_q4, par_q3, par_q2, par_q1)
+    
+    output$match_state <- renderTable({
+         match <- Match(Y = state$inventor, Tr = state$treatment, X = controls)
+    summary(match)
+    })
+   
+    
+    
+    # matching on cz level
+    
+    
 }
 
 # Run the application 

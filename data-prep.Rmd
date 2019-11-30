@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(readr)
+library(knitr)
 library(readxl)
 library(Matching)
 library(janitor)
@@ -125,7 +126,7 @@ Matching - state level
 ```{r}
 
 state_data <- state_data %>%
-  mutate(treatment = ifelse(cohort_mean > 0.5060, 1, 0))
+  mutate(treatment = ifelse(cohort_mean > 0.5, 1, 0))
 
 
 controls <-  state_data %>%
@@ -133,9 +134,33 @@ controls <-  state_data %>%
 
 match <- Match(Y = state_data$inventor, Tr = state_data$treatment, X = controls)
 summary(match)
+```
+
+Matching - cz level
 
 
+```{r}
 
+cz_data <- cz_data %>%
+  mutate_all(as.numeric)
+cz_data <- cz_data %>%
+  filter(inventor != "NA")%>%
+  filter(mobility != "NA")%>%
+  filter(violent_crime_rate != "NA") %>%
+  filter(migration_inflow_rate != "NA") %>%
+  filter(college_graduation_rate_income_adjusted != "NA") %>%
+  mutate(treatment = ifelse(mobility > 0.09, 1, 0))
+
+
+controls <-  cz_data %>%
+  select(par_q5, par_q4, par_q3, par_q2, par_q1, frac_black, violent_crime_rate, gini, migration_inflow_rate, migration_outlflow_rate, college_graduation_rate_income_adjusted)
+
+match <- Match(Y = cz_data$inventor, Tr = cz_data$treatment, X = controls)
+summary.Match(match)
 
 ```
+
+
+
+
 
