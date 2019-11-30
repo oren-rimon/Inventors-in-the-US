@@ -27,6 +27,13 @@ download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/table_
 download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/table2_state_absmob_by_cohort.xlsx", destfile = "raw-data/abs_mobility_state.xlsx", mode = "wb")
 download.file("https://opportunityinsights.org/wp-content/uploads/2019/01/mrc_table12.csv", destfile = "raw-data/state_income_dis.csv")
 
+# data by commuting zone
+
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/03/table_1a.csv", destfile = "raw-data/cz_innovetion.csv")
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/online_data_tables-7.xls", destfile = "raw-data/cz_characteristics.xls", mode = "wb")
+download.file("https://opportunityinsights.org/wp-content/uploads/2019/01/mrc_table13.csv", destfile = "raw-data/cz_income.csv")
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/preferred_measures.xlsx", destfile = "raw-data/cz_mobility.xlsx", mode="wb")
+
 ```
 
 
@@ -53,7 +60,7 @@ st_abs_mobility <- st_abs_mobility %>%
   filter(cohort == "1980") 
 
 st_inventors <- st_inventors %>%
-  select(par_stateabbrv, inventor, inventor_cat_1, inventor_cat_2, inventor_cat_3, inventor_cat_4,
+  select(par_stateabbrv, par_state, inventor, inventor_cat_1, inventor_cat_2, inventor_cat_3, inventor_cat_4,
          inventor_cat_5, inventor_cat_6, inventor_cat_7, inventor_g_f, inventor_g_m, kid_count)
 
 # combine three tables
@@ -61,8 +68,74 @@ st_inventors <- st_inventors %>%
 state_data <- merge(st_abs_mobility, st_inventors, by.x = "state_name", by.y = "par_stateabbrv")
 state_data <- merge(state_data, st_income, by.x = "state_name", by.y = "state_abbr")
 
+
 # write cleaned data as a csv
 
 write.csv(state_data, file = "App/by_state.csv")
+```
+
+
+Data by commuting zone:
+
+```{r}
+# read data
+
+cz_innovation <- read_csv("raw-data/cz_innovetion.csv")
+cz_income <- read_csv("raw-data/cz_income.csv")
+cz_mobility <- read_xlsx("raw-data/cz_mobility.xlsx", skip = 12)
+cz_charac <- read_xls("raw-data/cz_characteristics.xls", sheet = 'Online Data Table 8', skip = 6) %>%
+  clean_names()
+
+# clean income data and fillter for cohort = 1984
+
+cz_income <- cz_income %>%
+  filter(cohort == "1984") %>%
+  select(cz, par_q5, par_q4, par_q3, par_q2, par_q1) %>%
+  filter(cz != "-999")
+
+# clean innovation data
+cz_innovation <- cz_innovation %>%
+  select(par_cz, inventor) %>%
+  arrange(par_cz) %>%
+  rename(cz = par_cz)
+
+# clean mobility data
+
+cz_mobility <- cz_mobility %>%
+  clean_names() %>%
+  rename(mobility = p_child_in_q5_parent_in_q1_80_85_cohort)%>%
+  select(cz, mobility) %>%
+  mutate(mobility = as.numeric(mobility))
+
+# merge tables into one dataframe
+
+cz_data <- merge(cz_income, cz_innovation,  by = "cz")
+cz_data <- merge(cz_data, cz_mobility, by = "cz")
+cz_data <- merge(cz_data, cz_charac, by = "cz")
+
+# write csv into App file
+
+write.csv(cz_data, file = "App/by_cz.csv")
+
+```
+
+
+Matching - state level
+
+```{r}
+
+state_data <- state_data %>%
+  mutate(treatment = ifelse(cohort_mean > 0.5060, 1, 0))
+
+
+controls <-  state_data %>%
+  select(par_q5, par_q4, par_q3, par_q2, par_q1)
+
+match <- Match(Y = state_data$inventor, Tr = state_data$treatment, X = controls)
+summary(match)
+
+
+
+
 ```
 
