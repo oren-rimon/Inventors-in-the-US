@@ -35,6 +35,11 @@ download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/online
 download.file("https://opportunityinsights.org/wp-content/uploads/2019/01/mrc_table13.csv", destfile = "raw-data/cz_income.csv")
 download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/preferred_measures.xlsx", destfile = "raw-data/cz_mobility.xlsx", mode="wb")
 
+# data by college
+
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/04/table_3.csv", destfile = "raw-data/colleges.csv")
+download.file("https://opportunityinsights.org/wp-content/uploads/2018/03/mrc_table1.csv", destfile = "raw-data/colleges_mobility.csv")
+
 ```
 
 
@@ -121,6 +126,43 @@ write.csv(cz_data, file = "App/by_cz.csv")
 ```
 
 
+Data by College:
+```{r}
+# read file
+
+colleges <- read_csv("raw-data/colleges.csv")
+college_mobility <- read_csv("raw-data/colleges_mobility.csv")
+
+# add colums of share of students in differents income quantiles
+
+colleges <- colleges %>%
+  mutate(share_q1 = count_pq1/count,
+         share_q2 = count_pq2/count,
+         share_q3 = count_pq3/count,
+         share_q4 = count_pq4/count,
+         share_q5 = count_pq5/count)
+
+# clean college mobility data
+
+college_mobility <- college_mobility %>%
+  select(super_opeid, name, par_median, kq5_cond_parq1)
+
+# merge tables
+
+colleges_data <- merge(colleges, college_mobility, by = "super_opeid")
+
+# write csv into te App folder
+
+write.csv(colleges_data, file = "App/by_college.csv")
+
+
+```
+
+
+
+
+
+
 Matching - state level
 
 ```{r}
@@ -140,22 +182,28 @@ Matching - cz level
 
 
 ```{r}
+# clen data for matching
 
 cz_data <- cz_data %>%
   mutate_all(as.numeric)
-cz_data <- cz_data %>%
+cz_matching <- cz_data %>%
   filter(inventor != "NA")%>%
   filter(mobility != "NA")%>%
   filter(violent_crime_rate != "NA") %>%
   filter(migration_inflow_rate != "NA") %>%
   filter(college_graduation_rate_income_adjusted != "NA") %>%
+  
+  # creat treatment variable
+  
   mutate(treatment = ifelse(mobility > 0.09, 1, 0))
 
+# write csv for matching
+write.csv(cz_matching, file = "App/cz_matching.csv")
 
-controls <-  cz_data %>%
+controls <-  cz_matching %>%
   select(par_q5, par_q4, par_q3, par_q2, par_q1, frac_black, violent_crime_rate, gini, migration_inflow_rate, migration_outlflow_rate, college_graduation_rate_income_adjusted)
 
-match <- Match(Y = cz_data$inventor, Tr = cz_data$treatment, X = controls)
+match <- Match(Y = cz_matching$inventor, Tr = cz_matching$treatment, X = controls)
 summary.Match(match)
 
 ```
