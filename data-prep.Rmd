@@ -200,6 +200,8 @@ cz_matching <- cz_data %>%
 # write csv for matching
 write.csv(cz_matching, file = "App/cz_matching.csv")
 
+# matching model
+
 controls <-  cz_matching %>%
   select(par_q5, par_q4, par_q3, par_q2, par_q1, frac_black, violent_crime_rate, gini, migration_inflow_rate, migration_outlflow_rate, college_graduation_rate_income_adjusted)
 
@@ -208,6 +210,28 @@ summary.Match(match)
 
 ```
 
+Matching - college level:
+
+```{r}
+
+# creat treatment variable equals to the median of the mobilty rate
+
+median(colleges_data$kq5_cond_parq1)
+
+colleges_matching <- colleges_data %>%
+  mutate(treatment = ifelse(kq5_cond_parq1 > 30.2, 1, 0))
+  
+# write csv to the app
+write.csv(colleges_matching, file = "App/col_matching.csv")
+  
+# matching model
+
+controls_col <- colleges_matching %>%
+  select(share_q1, share_q2, share_q3, share_q4, share_q5)
+
+match <- Match(Y = colleges_matching$inventor, Tr = colleges_matching$treatment, X = controls_col)
+summary(match)
+```
 
 
 
