@@ -20,29 +20,23 @@ college <- read_csv("by_college.csv")
 cz_matching <- read_csv("cz_matching.csv")
 col_matching <- read_csv("col_matching.csv")
 
-# list of choices for state income quantile
 
-quantiles <- c("1st" = state$par_q1,
-               "2nd" = state$par_q2,
-               "3rd" = state$par_q3,
-               "4th" = state$par_q4,
-               "5th" = state$par_q5)
 
 # list of choices for commuting zone income quantile
 
-quantiles_cz <- c("1st" = cz$par_q1,
-                  "2nd" = cz$par_q2,
-                  "3rd" = cz$par_q3,
-                  "4th" = cz$par_q4,
-                  "5th" = cz$par_q5)
+quantiles_cz <- c("1st" = "par_q1",
+                  "2nd" = "par_q2",
+                  "3rd" = "par_q3",
+                  "4th" = "par_q4",
+                  "5th" = "par_q5")
 
 # list of choices for college income quantile
 
-quantiles_col <- c("1st" = college$share_q1,
-                  "2nd" = college$share_q2,
-                  "3rd" = college$share_q3,
-                  "4th" = college$share_q4,
-                  "5th" = college$share_q5)
+quantiles_col <- c("1st" = "share_q1",
+                  "2nd" = "share_q2",
+                  "3rd" = "share_q3",
+                  "4th" = "share_q4",
+                  "5th" = "share_q5")
 
 
 # Define UI for application that draws a histogram
@@ -88,7 +82,11 @@ I have decided to use the model of matching since I wanted to see whether househ
                             p(helpText("The x-axis represents the fraction of parents in a specific 
                                        income quintile. 1 represents the bottom quintile and 5 represents the top quintile.")),
                             selectInput(inputId = "in_q", label = "Select an Income Quntile", 
-                                        choices = quantiles),
+                                        choices = c("1st" = "par_q1",
+                                                    "2nd" = "par_q2",
+                                                    "3rd" = "par_q3",
+                                                    "4th" = "par_q4",
+                                                    "5th" = "par_q5")),
                         mainPanel(
                             plotOutput("plot1")))),
                        tabPanel("By Commuting Zone",
@@ -98,21 +96,51 @@ I have decided to use the model of matching since I wanted to see whether househ
                                        income quintile. 1 represents the bottom quintile and 5 represents the top quintile.")),
                                     selectInput(inputId = "in_q2", label = "Select an Income Quntile", choices = quantiles_cz),
                                     mainPanel(
-                                        plotOutput("plot2"))
-                                )),
+                                        plotOutput("plot2")))),
                        tabPanel("By College",
                                 fluidPage(
                                     titlePanel("By College"),
                                     p(helpText("The x-axis represents the fraction of students with parents in a specific 
                                        income quintile. 1 represents the bottom quintile and 5 represents the top quintile.")),
-                                    selectInput(inputId = "in_q3", label = "Select an Income Quntile", choices = quantiles_col))
-                                )
-                        )),
+                                    selectInput(inputId = "in_q3", label = "Select an Income Quntile", choices = quantiles_col),
+                                    mainPanel(
+                                        plotOutput("plot3")))))),
+               tabPanel("Gender",
+                        titlePanel("Is The Share of Female Inventors Related To Income Distribution?"),
+                        navlistPanel(
+                            tabPanel("By State",
+                                     fluidPage(
+                                         titlePanel("By State"),
+                                         p(helpText("The x-axis represents the fraction of parents in a specific 
+                                       income quintile. 1 represents the bottom quintile and 5 represents the top quintile.")),
+                                         selectInput(inputId = "in_qen_state", label = "Select an Income Quntile", 
+                                                     choices = c("1st" = "par_q1",
+                                                                 "2nd" = "par_q2",
+                                                                 "3rd" = "par_q3",
+                                                                 "4th" = "par_q4",
+                                                                 "5th" = "par_q5")),
+                                                     mainPanel(
+                                                         plotOutput("plot4"))
+                                         )),
+                            tabPanel("By Commuting Zone",
+                                     fluidPage(
+                                         titlePanel("By Commuting Zone"),
+                                         p(helpText("The x-axis represents the fraction of parents in a specific 
+                                       income quintile. 1 represents the bottom quintile and 5 represents the top quintile.")),
+                                         selectInput(inputId = "in_qen_cz", label = "Select an Income Quntile", choices = quantiles_cz),
+                                         mainPanel(
+                                             plotOutput("plot5"))))
+                            )),
               tabPanel("Economic Mobility",
                     navlistPanel(
                         tabPanel("Backgroung"),
                         tabPanel("By State",
-                                 verbatimTextOutput("match_state")),
+                                 h2("My model:"),
+                                 verbatimTextOutput("match_state"),
+                                 br(),
+                                 h2("Interactive model:"),
+                                 p(helpText("Select control variables. States will be matched on income level and on the variables you select. Please consult the table below for more details about the control variables."),
+                                   checkboxGroupInput(inputId = "control_1", label = "Select control variables", choices = c("")))),
                         tabPanel("By Commuting Zone",
                                  verbatimTextOutput("match_cz")),
                         tabPanel("By College",
@@ -128,15 +156,57 @@ server <- function(input, output) {
     # inventors vs income quantil by state
     output$plot1 <- renderPlot({
         
-        ggplot(data = state, aes(x = input$in_q, y =inventor)) +
-                   geom_point() 
+        colx = input$in_q
+        gg <- state %>%
+            ggplot(aes(x = get(colx), y =inventor)) +
+            geom_point() +
+            geom_smooth(method = "lm")
+        gg
     })
         
     # inventors vs income quantil by cz
     output$plot2 <- renderPlot({
-            ggplot(data = cz, aes(x = input$in_q2, y =inventor)) +
-                geom_point() 
+        colx1 = input$in_q2
+        gg2 <- cz %>%
+            ggplot(aes(x = get(colx1), y =inventor)) +
+            geom_point() +
+            geom_smooth(method = "lm")
+        gg2 
     }) 
+    # inventors vs income quantil by college
+    output$plot3 <- renderPlot({
+        colx3 = input$in_q3
+        gg3 <- college %>%
+            ggplot(aes(x = get(colx3), y = inventor)) +
+            geom_point() +
+            geom_smooth(method = "lm") +
+            scale_y_continuous(limits=c(0, 0.05))
+        gg3 
+    }) 
+    
+    # gender tab
+    # gender - state
+    output$plot4 <- renderPlot({
+        
+        x_var = input$in_qen_state
+        pl <- state %>%
+            ggplot(aes(x = get(x_var), y = share_f)) +
+            geom_point() +
+            geom_smooth(method = "lm")
+        pl
+    })
+    
+    # gender - cz
+    output$plot5 <- renderPlot({
+        
+        x_var1 = input$in_qen_cz
+        p2 <- cz %>%
+            ggplot(aes(x = get(x_var1), y = share_f)) +
+            geom_point() +
+            geom_smooth(method = "lm")
+        p2
+    })
+    
     
     # matching on state level
     

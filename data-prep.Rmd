@@ -74,6 +74,9 @@ st_inventors <- st_inventors %>%
 state_data <- merge(st_abs_mobility, st_inventors, by.x = "state_name", by.y = "par_stateabbrv")
 state_data <- merge(state_data, st_income, by.x = "state_name", by.y = "state_abbr")
 
+state_data <- state_data %>%
+  mutate(share_f = inventor_g_f/inventor,
+         share_m = (inventor_g_m/inventor - 1))
 
 # write cleaned data as a csv
 
@@ -101,7 +104,7 @@ cz_income <- cz_income %>%
 
 # clean innovation data
 cz_innovation <- cz_innovation %>%
-  select(par_cz, inventor) %>%
+  select(par_cz, inventor, inventor_g_m, inventor_g_f) %>%
   arrange(par_cz) %>%
   rename(cz = par_cz)
 
@@ -118,6 +121,15 @@ cz_mobility <- cz_mobility %>%
 cz_data <- merge(cz_income, cz_innovation,  by = "cz")
 cz_data <- merge(cz_data, cz_mobility, by = "cz")
 cz_data <- merge(cz_data, cz_charac, by = "cz")
+
+# gender share
+
+cz_data <- cz_data %>%
+  mutate(share_f = inventor_g_f/inventor,
+         share_m = (inventor_g_m/inventor - 1)) %>%
+  # filter for shares that are > 1
+  filter(share_f < 1)
+
 
 # write csv into App file
 
