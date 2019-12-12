@@ -41,40 +41,23 @@ quantiles_col <- c("1st" = "share_q1",
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    theme = shinytheme("flatly"),
     navbarPage("Inventors In The US", 
-               tabPanel("About",
-                        sidebarLayout(
-                            sidebarPanel("",
-                                         tags$style(".well background-color:[#E9967A];"),
-                                         panel_div(
-                                             class_type = "primary",
-                                             panel_title = "About Me",
-                                             content = (p("My name is Oren Rimon Or, and I am a second-year student at Harvard, studying Economics and Statistics.
-                                                          Please feel free to reach out to me with any question about the project: Oren_rimonor@college.harvard.edu"))),
-                                         panel_div(
-                                             class_type = "primary",
-                                             panel_title = "Source Code",
-                                             content = p("Interested in my code? Take a look at the GitHub repository found ", a("here.", href = "https://github.com/oren-rimon/Inventors-in-the-US"))
-                                         )),
-                            mainPanel(                        
-                                titlePanel("About The Project"),
-                                           p(paste("Who is likely to become an inventor? Does the income of our parents impact our chances of being listed on a patent application? Is a higher economic mobility associated with a higher inventors rate, when comparing two places with a similar income level?"),
-                                           p(HTML(paste("This app is based on the data collected by ", tags$a("Opportunity Insights.", href = "https://opportunityinsights.org/data/"), 'From Opportunity Insights data collection and analysis, we can see how inventors rate is highly correlated with parent income. We can also see how children who grow up in places with a high invention rate,  are much more likely to become inventors. 
-'))),
-                                           p(paste("In the “Income” tab, you can interactively explore  the associated relationship between income level and invention rate. The data is divided into five income quintiles,  when the first quintile represents the bottom 20 percentile,  and the fifth quintile represents the top 20 percentile. 
-")),
-                                           p(paste("In the “Gender”  you can interactively explore the associated relationship between income level and female inventors share. The female inventors share is calculated as the percentage of female inventors among the inventors in a specific state or commuting zone. This is different  from the female inventors rate. 
-")),
-                                           p(paste("My question is why do we see a difference in inventors rate between places who share the same income level. In the “Economic Mobility” I have made three models,  using matching,  in order to see whether economic mobility explains why places with a similar income level have different inventors rate. Places that share the same income level might differ substantially by their economic mobility rate. Economic mobility rate is defined in this data set as the probability of someone to reach the top 20 percentile, given that her parents are at the lowest 20 percentile.
-")),
-                                           p(paste("There are many variables that can explain the difference in inventors rate across places with similar income level. Teachers to students ratio is one small example,  but there are many more.   Therefore,  in my model I have matched  places on income level,  but also on other variables such as crime rate, gini coefficient and more. 
-")),
-                                           p(paste("I have decided to use the model of matching since I wanted to see whether household income is a potential confounding variable that affects the relationship between invention rate and economic mobility. Therefore, I matched neighborhoods with similar income level and other relevant variables, and checked whether those with a higher invention rate have a higher economic mobility as well. 
-"))
-
-                                )))),
+              
                tabPanel("Income",
                    navlistPanel(
+                       tabPanel("Background",
+                                fluidPage(
+                                    titlePanel("Is Innovation Related to Income?"),
+                                    p("What is the economic background of inventors in the US? Is the income distribution of parents in a specific state 
+                                               related to the children inventors rate in that state? Is the relationship similar at  the commuting zone or at the college level?"),
+                                    br(),
+                                    p("In this tab you can interactively explore the relationship between parents’ income distribution and inventors rate at the state, commuting zone and college level.
+                                      Parents income is divided into five equal quintiles, where the fifth quintile represents the top 20th percentile."),
+                                    br(),
+                                    p("In each graph, the vertical axis represents the inventors rate, and the horizontal axis represents the share of parents in the population that are part of the selected income quintile. Therefore, a higher value on the x axis means a 
+                                    larger share of the population that are part of the selected quintile.")
+                                )),
                        tabPanel("By State",
                         fluidPage(
                             titlePanel("By State"),
@@ -132,12 +115,13 @@ ui <- fluidPage(
                             )),
               tabPanel("Economic Mobility",
                     navlistPanel(
-                        tabPanel("Backgroung",
+                        tabPanel("Background",
                                  titlePanel("Background"),
-                                 p(paste("
-In the ‘Income’ tab we saw that as the share of the population in the higher quintiles increases,   the inventors rate of a given place increases as well. However,  we can still see a differentiation in inventors rate across places that share a similar income distribution.
-")),
-                                 p(paste("In this part I used matching in order to see whether economic mobility can potentially explain why commuting zones that share a similar income distribution differ by their inventors rate."))),
+                                 br(),
+                                 p("-"),
+                                 p("-"),
+                                 p("-"),
+                                 p("-")),
                         tabPanel("By State",
                                  h2("My model:"),
                                  verbatimTextOutput("match_state"),
@@ -150,7 +134,38 @@ In the ‘Income’ tab we saw that as the share of the population in the higher
                         tabPanel("By College",
                                  verbatimTextOutput("match_col"))
                     )
-               )
+               ),
+              tabPanel("About",
+                       sidebarLayout(
+                           sidebarPanel("",
+                                        tags$style(".well background-color:[#E9967A];"),
+                                        panel_div(
+                                            class_type = "primary",
+                                            panel_title = "About Me",
+                                            content = (p("My name is Oren Rimon Or, and I am a second-year student at Harvard, studying Economics and Statistics.
+                                                       Please feel free to reach out to me with any question about the project: Oren_rimonor@college.harvard.edu"))),
+                                        panel_div(
+                                            class_type = "primary",
+                                            panel_title = "Source Code",
+                                            content = p("Interested in my code? Take a look at the GitHub repository found ", a("here.", href = "https://github.com/oren-rimon/Inventors-in-the-US"))
+                                        )),
+                           mainPanel(                        
+                               titlePanel("About The Project"),
+                               p(paste("Who is likely to become an inventor? Does the income of our parents impact our chances of being listed on a patent application? Is a higher economic mobility associated with a higher inventors rate, when comparing two places with a similar income level?"),
+                                 p(HTML(paste("This app is based on the data collected by ", tags$a("Opportunity Insights.", href = "https://opportunityinsights.org/data/"), 'From Opportunity Insights data collection and analysis, we can see how inventors rate is highly correlated with parent income. We can also see how children who grow up in places with a high invention rate,  are much more likely to become inventors. 
+'))),
+                                 p(paste("In the “Income” tab, you can interactively explore  the associated relationship between income level and invention rate. The data is divided into five income quintiles,  when the first quintile represents the bottom 20 percentile,  and the fifth quintile represents the top 20 percentile. 
+")),
+                                 p(paste("In the “Gender”  you can interactively explore the associated relationship between income level and female inventors share. The female inventors share is calculated as the percentage of female inventors among the inventors in a specific state or commuting zone. This is different  from the female inventors rate. 
+")),
+                                 p(paste("My question is why do we see a difference in inventors rate between places who share the same income level. In the “Economic Mobility” I have made three models,  using matching,  in order to see whether economic mobility explains why places with a similar income level have different inventors rate. Places that share the same income level might differ substantially by their economic mobility rate. Economic mobility rate is defined in this data set as the probability of someone to reach the top 20 percentile, given that her parents are at the lowest 20 percentile.
+")),
+                                 p(paste("There are many variables that can explain the difference in inventors rate across places with similar income level. Teachers to students ratio is one small example,  but there are many more.   Therefore,  in my model I have matched  places on income level,  but also on other variables such as crime rate, gini coefficient and more. 
+")),
+                                 p(paste("I have decided to use the model of matching since I wanted to see whether household income is a potential confounding variable that affects the relationship between invention rate and economic mobility. Therefore, I matched neighborhoods with similar income level and other relevant variables, and checked whether those with a higher invention rate have a higher economic mobility as well. 
+"))
+                                 
+                               ))))
 ))
 
 # Define server logic required to draw a histogram
