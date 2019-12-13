@@ -55,7 +55,7 @@ st_abs_mobility <- read_xlsx("raw-data/abs_mobility_state.xlsx")
 st_income <- read_csv("raw-data/state_income_dis.csv")
 
 # clean
-
+ 
 st_income <- st_income %>%
   filter(state_name != "Missing") %>%
   # filter for 1980
