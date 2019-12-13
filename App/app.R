@@ -170,7 +170,7 @@ ui <- fluidPage(
                                         panel_div(
                                             class_type = "primary",
                                             panel_title = "About Me",
-                                            content = (p("My name is Oren Rimon Or, and I am a second-year student at Harvard, studying Economics and Statistics.
+                                            content = (p("My name is Oren Rimon Or, and I am a second-year student at Harvard University, studying Economics and Statistics.
                                                        Please feel free to reach out to me with any question: Oren_rimonor@college.harvard.edu"))),
                                         panel_div(
                                             class_type = "primary",
@@ -188,9 +188,10 @@ ui <- fluidPage(
                                  p(paste("My question is why do we see a difference in inventors rate between places who share the same income level. In the “Economic Mobility” I have made three models,  using matching,  in order to see whether economic mobility explains why places with a similar income level have different inventors rate. Places that share the same income level might differ substantially by their economic mobility rate. Economic mobility rate is defined in this data set as the probability of someone to reach the top 20 percentile, given that her parents are at the lowest 20 percentile.
 ")),
                                  p(paste("The main question of this project is why do we see a difference in inventors rate between places that share similar income distribution. In the “Economic Mobility” tab, I have made three matching models, in order to see whether economic mobility explains why places with a similar income level have different inventors rate. Places that share similar income distribution might differ substantially by their economic mobility rate. For commuting zones and colleges, economic mobility rate is defined in this data set as the probability of someone to reach the top 20% 
-                                         percent of the income distribution, given that her parents are at the bottom 20% percent. For states it is defined as the probability of earning more than your parents."))
-                               ))))
-))
+                                         percent of the income distribution, given that her parents are at the bottom 20% percent. For states it is defined as the probability of earning more than your parents.")),
+                                 br(),
+                                 tags$video(src = "introduction.mp4", type = "video/mp4", controls = "controls", width = "500px", height = "400px")
+                               ))))))
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
